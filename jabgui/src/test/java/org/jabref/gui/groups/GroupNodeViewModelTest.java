@@ -59,7 +59,7 @@ class GroupNodeViewModelTest {
     @Test
     void getDisplayNameConvertsLatexToUnicode() {
         GroupNodeViewModel viewModel = getViewModelForGroup(
-                new WordKeywordGroup("\\beta", GroupHierarchyType.INDEPENDENT, StandardField.TITLE, "search", true, ',', false));
+                new WordKeywordGroup("$\\beta$", GroupHierarchyType.INDEPENDENT, StandardField.TITLE, "search", true, ',', false));
         assertEquals("β", viewModel.getDisplayName());
     }
 

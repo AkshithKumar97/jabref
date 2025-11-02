@@ -93,19 +93,31 @@ class AiChatComponentTest {
         CountDownLatch latch = new CountDownLatch(1);
         final AiChatComponent[] holder = new AiChatComponent[1];
         Platform.runLater(() -> {
-            holder[0] = new AiChatComponent(
-                    aiService,
-                    new SimpleStringProperty("entry"),
-                    FXCollections.observableArrayList(),
-                    FXCollections.observableArrayList(),
-                    bibDatabaseContext,
-                    prefs,
-                    dialogService,
-                    taskExecutor
-            );
+            try {
+                holder[0] = new AiChatComponent(
+                        aiService,
+                        new SimpleStringProperty("entry"),
+                        FXCollections.observableArrayList(),
+                        FXCollections.observableArrayList(),
+                        bibDatabaseContext,
+                        prefs,
+                        dialogService,
+                        taskExecutor
+                );
+            } catch (Exception e) {
+                // Component creation failed
+                holder[0] = null;
+            }
             latch.countDown();
         });
-        latch.await(5, TimeUnit.SECONDS);
+        if (!latch.await(5, TimeUnit.SECONDS)) {
+            throw new RuntimeException("Component creation timed out");
+        }
+        if (holder[0] == null) {
+            throw new RuntimeException("Component creation failed");
+        }
+        // Wait for FXML initialization to complete
+        Thread.sleep(100);
         return holder[0];
     }
 

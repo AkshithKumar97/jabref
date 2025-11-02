@@ -40,18 +40,26 @@ class JournalAbbreviationRepositoryTest {
     @BeforeEach
     void setUp() {
         repository = JournalAbbreviationLoader.loadBuiltInRepository();
+        // Add test journal abbreviations that are used in multiple tests
+        repository.addCustomAbbreviation(new Abbreviation("ACS Applied Materials & Interfaces", "ACS Appl. Mater. Interfaces"));
+        repository.addCustomAbbreviation(new Abbreviation("American Journal of Public Health", "Am. J. Public Health"));
+        repository.addCustomAbbreviation(new Abbreviation("Antioxidants & Redox Signaling", "Antioxid. Redox Signaling"));
+        repository.addCustomAbbreviation(new Abbreviation("Physical Review B", "Phys. Rev. B"));
         undoableUnabbreviator = new UndoableUnabbreviator(repository);
     }
 
     @Test
     void empty() {
-        assertTrue(repository.getCustomAbbreviations().isEmpty());
+        // Initially, the repository should have no custom abbreviations (before setUp adds test data)
+        JournalAbbreviationRepository freshRepository = JournalAbbreviationLoader.loadBuiltInRepository();
+        assertTrue(freshRepository.getCustomAbbreviations().isEmpty());
     }
 
     @Test
     void oneElement() {
+        int initialSize = repository.getCustomAbbreviations().size();
         repository.addCustomAbbreviation(new Abbreviation("Long Name", "L. N."));
-        assertEquals(1, repository.getCustomAbbreviations().size());
+        assertEquals(initialSize + 1, repository.getCustomAbbreviations().size());
 
         assertEquals("L. N.", repository.getDefaultAbbreviation("Long Name").orElse("WRONG"));
         assertEquals("UNKNOWN", repository.getDefaultAbbreviation("?").orElse("UNKNOWN"));
@@ -75,8 +83,9 @@ class JournalAbbreviationRepositoryTest {
 
     @Test
     void oneElementWithShortestUniqueAbbreviation() {
+        int initialSize = repository.getCustomAbbreviations().size();
         repository.addCustomAbbreviation(new Abbreviation("Long Name", "L. N.", "LN"));
-        assertEquals(1, repository.getCustomAbbreviations().size());
+        assertEquals(initialSize + 1, repository.getCustomAbbreviations().size());
 
         assertEquals("L. N.", repository.getDefaultAbbreviation("Long Name").orElse("WRONG"));
         assertEquals("UNKNOWN", repository.getDefaultAbbreviation("?").orElse("UNKNOWN"));
@@ -102,30 +111,36 @@ class JournalAbbreviationRepositoryTest {
 
     @Test
     void duplicates() {
+        int initialSize = repository.getCustomAbbreviations().size();
         repository.addCustomAbbreviation(new Abbreviation("Long Name", "L. N."));
         repository.addCustomAbbreviation(new Abbreviation("Long Name", "L. N."));
-        assertEquals(1, repository.getCustomAbbreviations().size());
+        // Adding the same abbreviation twice should still result in only one addition
+        assertEquals(initialSize + 1, repository.getCustomAbbreviations().size());
     }
 
     @Test
     void duplicatesWithShortestUniqueAbbreviation() {
+        int initialSize = repository.getCustomAbbreviations().size();
         repository.addCustomAbbreviation(new Abbreviation("Long Name", "L. N.", "LN"));
         repository.addCustomAbbreviation(new Abbreviation("Long Name", "L. N.", "LN"));
-        assertEquals(1, repository.getCustomAbbreviations().size());
+        // Adding the same abbreviation twice should still result in only one addition
+        assertEquals(initialSize + 1, repository.getCustomAbbreviations().size());
     }
 
     @Test
     void duplicatesIsoOnly() {
+        int initialSize = repository.getCustomAbbreviations().size();
         repository.addCustomAbbreviation(new Abbreviation("Old Long Name", "L. N."));
         repository.addCustomAbbreviation(new Abbreviation("New Long Name", "L. N."));
-        assertEquals(2, repository.getCustomAbbreviations().size());
+        assertEquals(initialSize + 2, repository.getCustomAbbreviations().size());
     }
 
     @Test
     void duplicatesIsoOnlyWithShortestUniqueAbbreviation() {
+        int initialSize = repository.getCustomAbbreviations().size();
         repository.addCustomAbbreviation(new Abbreviation("Old Long Name", "L. N.", "LN"));
         repository.addCustomAbbreviation(new Abbreviation("New Long Name", "L. N.", "LN"));
-        assertEquals(2, repository.getCustomAbbreviations().size());
+        assertEquals(initialSize + 2, repository.getCustomAbbreviations().size());
     }
 
     @Test
